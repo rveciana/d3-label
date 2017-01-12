@@ -1,0 +1,23 @@
+{
+  "name": "d3-label",
+  "version": "0.0.1",
+  "description": "Place labels with d3js on maps and other vizualisations",
+  "main": "build/d3-label.js",
+  "jsnext:main": "index",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "d3",
+    "label",
+    "labels"
+  ],
+  "author": {
+    "name": "Roger Veciana i Rovira",
+    "url": "https://geoexamples.com"
+  },
+  "license": "ISC"
+}
