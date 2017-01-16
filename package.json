@@ -26,5 +26,8 @@
     "package-preamble": "0.0.2",
     "rollup": "^0.41.1",
     "tape": "^4.6.3"
+  },
+  "dependencies": {
+    "d3-dispatch": "^1.0.2"
   }
 }

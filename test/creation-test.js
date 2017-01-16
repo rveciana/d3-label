@@ -3,7 +3,7 @@ Canvas = require("canvas"),
 labels = require("../");
 
 tape("Default values change test", function(test) {
-  var instance = labels.labels();
+  var instance = labels.labels().canvas(function() { return new Canvas(1, 1); });
   test.deepEqual(instance.size(), [256, 256], "Default size");
   test.deepEqual(instance.size([300, 300]).size(),[300, 300], "Change size");
 
@@ -11,11 +11,14 @@ tape("Default values change test", function(test) {
 
   test.deepEqual(instance.canvas()(), new Canvas(1, 1), "Set canvas");
 
+  //TODO: Change geometry, Font, etc
   test.end();
 });
 
 tape("Test empty labels array start", function(test) {
-  var instance = labels.labels().start();
+  var instance = labels.labels()
+      .canvas(function() { return new Canvas(1, 1); })
+      .start();
   test.equal(instance.places().length, 0, "Start with no places maintains 0 places");
 
   test.end();
@@ -24,6 +27,7 @@ tape("Test empty labels array start", function(test) {
 tape("Test default labels setting", function(test) {
   var locations = [{text: "Hello"}, {text: "World"}];
   var instance = labels.labels()
+    .canvas(function() { return new Canvas(1, 1); })
     .places(locations)
     .start();
 
