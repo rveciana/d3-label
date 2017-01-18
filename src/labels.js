@@ -1,9 +1,6 @@
 import dispatch from "d3-dispatch";
+import {labelsSprite} from "./sprites";
 
-var cw = 1 << 11 >> 5,
-    ch = 1 << 11;
-
-var fs = require("fs");
 export default function() {
   var size = [256, 256],
   timer = null,
@@ -41,7 +38,7 @@ export default function() {
   };
 
   labels.start = function(){
-    var contextAndRatio = getContext(canvas()),
+    var context = canvas().getContext("2d"),
     board = zeroArray((size[0] >> 5) * size[1]),
     bounds = null,
     n = places.length,
@@ -67,12 +64,11 @@ export default function() {
       var start = Date.now();
       while (Date.now() - start < timeInterval && ++i < n && timer) {
         var d = data[i];
-        labelsSprite(contextAndRatio, d, data, i);
-
+        labelsSprite(context, d);
         placedLabels.push();
-        console.info(i, n);
+        console.info("ELEMENT", i, n);
+        console.info(d);
       }
-      i = 2000;
       if (i >= n) {
         labels.stop();
         event.call("end", labels, placedLabels, bounds);
@@ -87,20 +83,6 @@ export default function() {
     }
     return labels;
   };
-
-  function getContext(canvas) {
-    canvas.width = canvas.height = 1;
-    var ratio = Math.sqrt(canvas.getContext("2d").getImageData(0, 0, 1, 1).data.length >> 2);
-    canvas.width = (cw << 5) / ratio;
-    canvas.height = ch / ratio;
-
-    var context = canvas.getContext("2d");
-    context.fillStyle = context.strokeStyle = "red";
-    context.textAlign = "center";
-
-    return {context: context, ratio: ratio};
-  }
-
 
   return labels();
 }
@@ -145,6 +127,7 @@ function zeroArray(n) {
   return a;
 }
 
+/*
 // Fetches a monochrome sprite bitmap for the specified text.
 // Load in batches for speed.
 function labelsSprite(contextAndRatio, d, data, di) {
@@ -206,6 +189,7 @@ function labelsSprite(contextAndRatio, d, data, di) {
           w32 = w >> 5,
           h = d.y1 - d.y0;
       // Zero the buffer
+
       for (var i = 0; i < h * w32; i++) sprite[i] = 0;
       x = d.xoff;
       if (x == null) return;
@@ -232,3 +216,4 @@ function labelsSprite(contextAndRatio, d, data, di) {
   }
   return null;
 }
+*/
