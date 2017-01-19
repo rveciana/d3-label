@@ -1,16 +1,39 @@
 // d3-labels Version 0.0.1. Copyright 2017 Roger Veciana i Rovira.
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-dispatch')) :
-  typeof define === 'function' && define.amd ? define(['exports', 'd3-dispatch'], factory) :
-  (factory((global.d3 = global.d3 || {}),global.dispatch));
-}(this, (function (exports,dispatch) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('d3-dispatch'), require('fs')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'd3-dispatch', 'fs'], factory) :
+	(factory((global.d3 = global.d3 || {}),global.d3,global.fs));
+}(this, (function (exports,dispatch,fs) { 'use strict';
 
 dispatch = 'default' in dispatch ? dispatch['default'] : dispatch;
 
 var cw = 1 << 11 >> 5;
 var ch = 1 << 11;
 
-var fs = require("fs");
+function labelsSprite(context, label) {
+  context.canvas.width = (cw << 5);
+  context.canvas.height = ch;
+  context.clearRect(0, 0, (cw << 5), ch);
+
+  context.save();
+  context.font = label.style + " " + label.weight + " " + ~~(label.size + 1) + "px " + label.font;
+  var w = context.measureText(label.text + "m").width ,
+  h = label.size << 1;
+  w = (w + 0x1f) >> 5 << 5;
+
+  context.translate(w >> 1, h >> 1);
+  context.fillText(label.text, 0, 0);
+  if (label.padding) {
+    context.lineWidth = 2 * label.padding;
+    context.strokeText(label.text, 0, 0);
+  }
+  context.restore();
+  context.canvas.pngStream().pipe(fs.createWriteStream("/tmp/test.png"));
+  label.width = w;
+  label.height = h;
+  return null;
+}
+
 var labels = function() {
   var size = [256, 256],
   timer = null,
@@ -48,7 +71,7 @@ var labels = function() {
   };
 
   labels.start = function(){
-    var contextAndRatio = getContext(canvas()),
+    var context = canvas().getContext("2d"),
     board = zeroArray((size[0] >> 5) * size[1]),
     bounds = null,
     n = places.length,
@@ -74,12 +97,11 @@ var labels = function() {
       var start = Date.now();
       while (Date.now() - start < timeInterval && ++i < n && timer) {
         var d = data[i];
-        labelsSprite(contextAndRatio, d, data, i);
-
+        labelsSprite(context, d);
         placedLabels.push();
-        console.info(i, n);
+        console.info("ELEMENT", i, n);
+        console.info(d);
       }
-      i = 2000;
       if (i >= n) {
         labels.stop();
         event.call("end", labels, placedLabels, bounds);
@@ -94,20 +116,6 @@ var labels = function() {
     }
     return labels;
   };
-
-  function getContext(canvas) {
-    canvas.width = canvas.height = 1;
-    var ratio = Math.sqrt(canvas.getContext("2d").getImageData(0, 0, 1, 1).data.length >> 2);
-    canvas.width = (cw << 5) / ratio;
-    canvas.height = ch / ratio;
-
-    var context = canvas.getContext("2d");
-    context.fillStyle = context.strokeStyle = "red";
-    context.textAlign = "center";
-
-    return {context: context, ratio: ratio};
-  }
-
 
   return labels();
 };
@@ -152,6 +160,7 @@ function zeroArray(n) {
   return a;
 }
 
+/*
 // Fetches a monochrome sprite bitmap for the specified text.
 // Load in batches for speed.
 function labelsSprite(contextAndRatio, d, data, di) {
@@ -213,6 +222,7 @@ function labelsSprite(contextAndRatio, d, data, di) {
           w32 = w >> 5,
           h = d.y1 - d.y0;
       // Zero the buffer
+
       for (var i = 0; i < h * w32; i++) sprite[i] = 0;
       x = d.xoff;
       if (x == null) return;
@@ -239,6 +249,7 @@ function labelsSprite(contextAndRatio, d, data, di) {
   }
   return null;
 }
+*/
 
 exports.labels = labels;
 

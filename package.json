@@ -8,8 +8,10 @@
     "test": "test"
   },
   "scripts": {
-    "pretest": "rollup --banner \"$(preamble)\" -f umd -n d3 -o build/d3-labels.js -- index.js",
-    "test": "tape 'test/*-test.js' && mkdir -p test/output && eslint index.js src"
+    "pretest": "npm run build && npm run build-test",
+    "test": "tape 'test/*-test.js' && mkdir -p test/output && eslint index.js src",
+    "build": "rollup --banner \"$(preamble)\" -f umd -g d3-dispatch:d3 -n d3 -o build/d3-labels.js -- index.js",
+    "build-test": "rollup -f umd -n d3 -o test/output/sprites.js -- src/sprites.js"
   },
   "keywords": [
     "d3",
