@@ -46,14 +46,15 @@ export default function() {
     placedLabels = [];
     var data = places.map(function(d, i) {
           d.text = text.call(this, d, i);
+          d.geometry = geometry.call(this, d, i);
           d.font = font.call(this, d, i);
           d.style = fontStyle.call(this, d, i);
           d.weight = fontWeight.call(this, d, i);
           d.size = ~~fontSize.call(this, d, i);
           d.padding = padding.call(this, d, i);
+          console.info("---->", d.geometry);
           return d;
         }).sort(function(a, b) { return b.size - a.size; });
-
 
     if (timer) {clearInterval(timer);}
     timer = setInterval(step, 0);
@@ -64,8 +65,10 @@ export default function() {
       var start = Date.now();
       while (Date.now() - start < timeInterval && ++i < n && timer) {
         var d = data[i];
-        pointLabelsSprite(context, d);
-        placedLabels.push();
+        var sprite = pointLabelsSprite(context, d);
+        var cc = collide(sprite, d, board, size[0]);
+        console.info("COLLIDE", cc);
+        placedLabels.push(d);
       }
       if (i >= n) {
         labels.stop();
@@ -121,6 +124,37 @@ function functor(d) {
 function zeroArray(n) {
   var a = [],
       i = -1;
-  while (++i < n) a[i] = 0;
+  while (++i < n) {a[i] = 0;}
   return a;
+}
+
+function collide(spriteObj, label, board, xSize){
+  console.info("GEOME", label['geometry']);
+  var sprite = spriteObj.sprite,
+  h = spriteObj['y1'],
+  w = spriteObj['width'];
+/*
+  var w = spriteObj['width'] >> 5,
+     lx = label.geometry[0] - (w << 4),
+     sx = lx & 0x7f,
+     msx = 32 - sx,
+     h = spriteObj.y1 - spriteObj.y0,
+     x = (label.geometry[1] + spriteObj.y0) * xSize + (lx >> 5);
+*/
+  for (var j = 0; j < h; j++) {
+    for (var i = 0; i <= w; i++) {
+      //if(board[x + i]) return true;
+    }
+  }
+
+  /*
+    last = 0;
+    for (var i = 0; i <= w; i++) {
+      if (((last << msx) | (i < w ? (last = sprite[j * w + i]) >>> sx : 0))
+          & board[x + i]) return true;
+    }
+    x += sw;
+}
+*/
+  return false;
 }
