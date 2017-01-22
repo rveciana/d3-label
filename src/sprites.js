@@ -1,6 +1,6 @@
 import {createWriteStream} from "fs";
 
-export function labelsSprite(context, label) {
+export function pointLabelsSprite(context, label) {
   context.save();
   context.font = label.style + " " + label.weight + " " + ~~(label.size + 1) + "px " + label.font;
 
@@ -48,10 +48,6 @@ export function labelsSprite(context, label) {
     }
   }
 
-  label.width = w;
-  label.height = y1-y0;
-  label.y0 = y0;
-  label.y1 = y1;
-
-  return sprite.slice(0, (y1 + 1) * w32);
+  return {width: w, height: y1-y0, y0:y0, y1:y1,
+    sprite: sprite.slice(0, (y1 + 1) * w32)};
 }

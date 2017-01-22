@@ -7,7 +7,7 @@
 
 dispatch = 'default' in dispatch ? dispatch['default'] : dispatch;
 
-function labelsSprite(context, label) {
+function pointLabelsSprite(context, label) {
   context.save();
   context.font = label.style + " " + label.weight + " " + ~~(label.size + 1) + "px " + label.font;
 
@@ -55,12 +55,8 @@ function labelsSprite(context, label) {
     }
   }
 
-  label.width = w;
-  label.height = y1-y0;
-  label.y0 = y0;
-  label.y1 = y1;
-
-  return sprite.slice(0, (y1 + 1) * w32);
+  return {width: w, height: y1-y0, y0:y0, y1:y1,
+    sprite: sprite.slice(0, (y1 + 1) * w32)};
 }
 
 var labels = function() {
@@ -126,7 +122,7 @@ var labels = function() {
       var start = Date.now();
       while (Date.now() - start < timeInterval && ++i < n && timer) {
         var d = data[i];
-        labelsSprite(context, d);
+        pointLabelsSprite(context, d);
         placedLabels.push();
       }
       if (i >= n) {
@@ -186,97 +182,6 @@ function zeroArray(n) {
   while (++i < n) a[i] = 0;
   return a;
 }
-
-/*
-// Fetches a monochrome sprite bitmap for the specified text.
-// Load in batches for speed.
-function labelsSprite(contextAndRatio, d, data, di) {
-  if (d.sprite) {return;}
-  var c = contextAndRatio.context,
-      ratio = contextAndRatio.ratio;
-
-  c.clearRect(0, 0, (cw << 5) / ratio, ch / ratio);
-
-  var x = 0,
-      y = 0,
-      maxh = 0,
-      n = data.length;
-  --di;
-  while (++di < n) {
-    d = data[di];
-    c.save();
-    c.font = d.style + " " + d.weight + " " + ~~((d.size + 1) / ratio) + "px " + d.font;
-    var w = c.measureText(d.text + "m").width * ratio,
-    h = d.size << 1;
-
-    w = (w + 0x1f) >> 5 << 5;
-    if (h > maxh) {maxh = h;}
-    if (x + w >= (cw << 5)) {
-      x = 0;
-      y += maxh;
-      maxh = 0;
-    }
-    if (y + h >= ch) {break;}
-    c.translate((x + (w >> 1)) / ratio, (y + (h >> 1)) / ratio);
-
-    c.fillText(d.text, 0, 0);
-    //c.canvas.pngStream().pipe(fs.createWriteStream("/tmp/test"+d.text+"-"+di+".png"));
-    if (d.padding) {
-      c.lineWidth = 2 * d.padding;
-      c.strokeText(d.text, 0, 0);
-      console.info("ITER",d.text, di);
-    }
-    c.restore();
-    d.width = w;
-    d.height = h;
-    d.xoff = x;
-    d.yoff = y;
-    d.x1 = w >> 1;
-    d.y1 = h >> 1;
-    d.x0 = -d.x1;
-    d.y0 = -d.y1;
-    d.hasText = true;
-    x += w;
-
-    }
-
-    var pixels = c.getImageData(0, 0, (cw << 5) / ratio, ch / ratio).data,
-        sprite = [];
-    while (--di >= 0) {
-      d = data[di];
-      if (!d.hasText) continue;
-      var w = d.width,
-          w32 = w >> 5,
-          h = d.y1 - d.y0;
-      // Zero the buffer
-
-      for (var i = 0; i < h * w32; i++) sprite[i] = 0;
-      x = d.xoff;
-      if (x == null) return;
-      y = d.yoff;
-      var seen = 0,
-          seenRow = -1;
-      for (var j = 0; j < h; j++) {
-        for (var i = 0; i < w; i++) {
-          var k = w32 * j + (i >> 5),
-              m = pixels[((y + j) * (cw << 5) + (x + i)) << 2] ? 1 << (31 - (i % 32)) : 0;
-          sprite[k] |= m;
-          seen |= m;
-        }
-        if (seen) seenRow = j;
-        else {
-          d.y0++;
-          h--;
-          j--;
-          y++;
-        }
-      }
-      d.y1 = d.y0 + seenRow;
-      d.sprite = sprite.slice(0, (d.y1 - d.y0) * w32);
-  }
-  return null;
-}
-*/
 
 exports.labels = labels;
 
