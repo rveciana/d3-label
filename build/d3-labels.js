@@ -7,21 +7,21 @@
 
 dispatch = 'default' in dispatch ? dispatch['default'] : dispatch;
 
-var cw = 1 << 11 >> 5;
-var ch = 1 << 11;
-
 function labelsSprite(context, label) {
-  context.canvas.width = (cw << 5);
-  context.canvas.height = ch;
-  context.clearRect(0, 0, (cw << 5), ch);
-
   context.save();
   context.font = label.style + " " + label.weight + " " + ~~(label.size + 1) + "px " + label.font;
-  var w = context.measureText(label.text + "m").width ,
-  h = label.size << 1;
-  w = (w + 0x1f) >> 5 << 5;
-  console.info(context.measureText(label.text + "m"));
-  //context.translate(w >> 1, h >> 1);
+
+  var w = context.measureText(label.text).width;
+  var h = label.size << 1;
+  if (label.padding) {
+    w += label.padding * 2;
+    h += label.padding * 2;
+  }
+
+  context.canvas.height = h;
+
+  context.canvas.width = w;
+  context.clearRect(0, 0, w, h);
   context.translate(0, label.size);
   context.fillText(label.text, 0, 0);
   if (label.padding) {
@@ -30,37 +30,37 @@ function labelsSprite(context, label) {
   }
   context.restore();
   context.canvas.pngStream().pipe(fs.createWriteStream("/tmp/test.png"));
-  label.width = w;
-  label.height = h;
 
-  var pixels = context.getImageData(0, 0, cw << 5, ch).data,
+  var pixels = context.getImageData(0, 0, w, h).data,
   sprite = [];
-  // -----> if (!d.hasText) continue;
+
   var w32 = w >> 5;
   for (var i = 0; i < h * w32; i++) {sprite[i] = 0;}
-  var seen = 0,
-      seenRow = -1,
-      y = 0, x = 0;
-  var y0 = h >> 1;
+  var seen = 0;
+  var y0 = null;
   var y1 = y0;
 
   for (var j = 0; j < h; j++) {
-    for (var i = 0; i < w; i++) {
+    seen = 0;
+    for (i = 0; i < w; i++) {
       var k = w32 * j + (i >> 5),
-          m = pixels[((y + j) * (cw << 5) + (x + i)) << 2] ? 1 << (31 - (i % 32)) : 0;
+          m = pixels[3+((j * w + i)<<2)] ? 1 << (31 - (i % 32)) : 0;
       sprite[k] |= m;
       seen |= m;
     }
-    if (seen) {seenRow = j;}
-    else {
-      y0++;
-      h--;
-      j--;
-      y++;
+
+    if (seen) {
+      if(!y0){y0 = j;}
+      y1 = j;
     }
   }
-  y1 = y0 + seenRow;
-  return sprite.slice(0, (y1 - y0) * w32);
+
+  label.width = w;
+  label.height = y1-y0;
+  label.y0 = y0;
+  label.y1 = y1;
+
+  return sprite.slice(0, (y1 + 1) * w32);
 }
 
 var labels = function() {
@@ -128,8 +128,6 @@ var labels = function() {
         var d = data[i];
         labelsSprite(context, d);
         placedLabels.push();
-        console.info("ELEMENT", i, n);
-        console.info(d);
       }
       if (i >= n) {
         labels.stop();

@@ -66,8 +66,6 @@ export default function() {
         var d = data[i];
         labelsSprite(context, d);
         placedLabels.push();
-        console.info("ELEMENT", i, n);
-        console.info(d);
       }
       if (i >= n) {
         labels.stop();

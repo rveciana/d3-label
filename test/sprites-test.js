@@ -15,5 +15,6 @@ tape("Point labels sprite test", function(test) {
   var sprite = sprites.labelsSprite(context, label);
 
   console.info("SPRITES", sprite.length);
+  console.info("LABEL", label);
   test.end();
 });
