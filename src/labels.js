@@ -43,10 +43,12 @@ export default function() {
     bounds = null,
     n = places.length,
     i = -1,
+    geomExists = true,
     placedLabels = [];
     var data = places.map(function(d, i) {
           d.text = text.call(this, d, i);
-          d.geometry = geometry.call(this, d, i);
+          if(d.geometry){d.geometry = geometry.call(this, d, i);}
+          else{geomExists=false;}
           d.font = font.call(this, d, i);
           d.style = fontStyle.call(this, d, i);
           d.weight = fontWeight.call(this, d, i);
@@ -56,9 +58,10 @@ export default function() {
           return d;
         }).sort(function(a, b) { return b.size - a.size; });
 
-    if (timer) {clearInterval(timer);}
-    timer = setInterval(step, 0);
-    step();
+    if(geomExists){
+      if (timer) {clearInterval(timer);}
+      timer = setInterval(step, 0);
+    }
     return labels;
 
     function step() {
@@ -129,18 +132,18 @@ function zeroArray(n) {
 }
 
 function collide(spriteObj, label, board, xSize){
-  console.info("GEOME", label['geometry']);
+  console.info("GEOME", label['geometry'][0]);
   var sprite = spriteObj.sprite,
   h = spriteObj['y1'],
   w = spriteObj['width'];
-/*
+
   var w = spriteObj['width'] >> 5,
      lx = label.geometry[0] - (w << 4),
      sx = lx & 0x7f,
      msx = 32 - sx,
      h = spriteObj.y1 - spriteObj.y0,
      x = (label.geometry[1] + spriteObj.y0) * xSize + (lx >> 5);
-*/
+     console.info(x);
   for (var j = 0; j < h; j++) {
     for (var i = 0; i <= w; i++) {
       //if(board[x + i]) return true;
